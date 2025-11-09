@@ -5,3 +5,4 @@ db.json
 .DS_Store
 examples/**/db.json
 examples/**/.env
+.npmrc
