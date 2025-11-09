@@ -5,7 +5,7 @@
 ### Option 1: Use as NPM Package (Recommended)
 
 ```bash
-npm install @solana-tip/sdk
+npm install solana-tip-overlay-sdk
 ```
 
 ### Option 2: Clone and Use Locally
@@ -121,7 +121,7 @@ The overlay should show the simulated tip immediately!
 ```javascript
 import express from 'express';
 import { createServer } from 'http';
-import { SolanaTipSDK, LowdbAdapter } from '@solana-tip/sdk';
+import { SolanaTipSDK, LowdbAdapter } from 'solana-tip-overlay-sdk';
 
 const app = express();
 const httpServer = createServer(app);
@@ -160,7 +160,7 @@ httpServer.listen(3000);
 
 ```html
 <script type="module">
-  import { PhantomWalletAdapter, TipSender } from '@solana-tip/sdk/client';
+  import { PhantomWalletAdapter, TipSender } from 'solana-tip-overlay-sdk/client';
   
   const wallet = new PhantomWalletAdapter();
   const tipSender = new TipSender();
