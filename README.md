@@ -1,10 +1,10 @@
-# solana-tip-overlay-sdk
+# @anuragchvn-blip/solana-tip-overlay-sdk
 
 **A complete SDK for building Solana tip overlays for streamers on mainnet.**
 
 Enable your viewers to tip streamers directly with SOL, with real-time overlay animations in OBS. No on-chain program required - uses simple SPL transfers with signature verification.
 
-[![npm version](https://img.shields.io/npm/v/solana-tip-overlay-sdk.svg)](https://www.npmjs.com/package/solana-tip-overlay-sdk)
+[![npm version](https://img.shields.io/npm/v/@anuragchvn-blip/solana-tip-overlay-sdk.svg)](https://www.npmjs.com/package/@anuragchvn-blip/solana-tip-overlay-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -26,8 +26,25 @@ Enable your viewers to tip streamers directly with SOL, with real-time overlay a
 
 ## 📦 Installation
 
+### From GitHub Packages
+
+First, configure npm to use GitHub Packages. Create/edit `.npmrc` in your project:
+
+```
+@anuragchvn-blip:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+Then install:
+
 ```bash
-npm install solana-tip-overlay-sdk
+npm install @anuragchvn-blip/@anuragchvn-blip/solana-tip-overlay-sdk
+```
+
+### From NPM Registry
+
+```bash
+npm install @anuragchvn-blip/solana-tip-overlay-sdk
 ```
 
 **Peer Dependencies:**
@@ -44,7 +61,7 @@ npm install express @solana/web3.js ws lowdb dotenv
 ```javascript
 import express from 'express';
 import { createServer } from 'http';
-import { SolanaTipSDK, LowdbAdapter } from 'solana-tip-overlay-sdk';
+import { SolanaTipSDK, LowdbAdapter } from '@anuragchvn-blip/@anuragchvn-blip/solana-tip-overlay-sdk';
 
 const app = express();
 const httpServer = createServer(app);
@@ -86,7 +103,7 @@ httpServer.listen(3000);
 ### 2. Streamer Wallet Linking (Frontend)
 
 ```javascript
-import { PhantomWalletAdapter } from 'solana-tip-overlay-sdk/client';
+import { PhantomWalletAdapter } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 
 const wallet = new PhantomWalletAdapter();
 const pubkey = await wallet.connect();
@@ -105,7 +122,7 @@ await fetch('/api/register', {
 ### 3. Viewer Tipping (Frontend)
 
 ```javascript
-import { TipSender } from 'solana-tip-overlay-sdk/client';
+import { TipSender } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 import * as solanaWeb3 from '@solana/web3.js';
 
 const tipSender = new TipSender();
@@ -126,7 +143,7 @@ const signature = await tipSender.sendTip({
 ### 4. OBS Overlay (Frontend)
 
 ```javascript
-import { OverlayClient } from 'solana-tip-overlay-sdk/client';
+import { OverlayClient } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 
 const client = new OverlayClient('ws://localhost:3000/ws', 'mychannel');
 
@@ -151,7 +168,7 @@ client.connect();
 Main SDK class that orchestrates all components.
 
 ```javascript
-import { SolanaTipSDK } from 'solana-tip-overlay-sdk';
+import { SolanaTipSDK } from '@anuragchvn-blip/solana-tip-overlay-sdk';
 
 const sdk = new SolanaTipSDK(storage, options);
 await sdk.start();
@@ -286,7 +303,7 @@ class CustomAdapter extends StorageAdapter {
 File-based JSON storage (good for MVP/development).
 
 ```javascript
-import { LowdbAdapter } from 'solana-tip-overlay-sdk/adapters';
+import { LowdbAdapter } from '@anuragchvn-blip/solana-tip-overlay-sdk/adapters';
 
 const storage = new LowdbAdapter('./db.json');
 await storage.init();
@@ -297,7 +314,7 @@ await storage.init();
 In-memory storage (testing only, data lost on restart).
 
 ```javascript
-import { MemoryAdapter } from 'solana-tip-overlay-sdk/adapters';
+import { MemoryAdapter } from '@anuragchvn-blip/solana-tip-overlay-sdk/adapters';
 
 const storage = new MemoryAdapter();
 ```
@@ -307,7 +324,7 @@ const storage = new MemoryAdapter();
 Example implementation:
 
 ```javascript
-import { StorageAdapter } from 'solana-tip-overlay-sdk/adapters';
+import { StorageAdapter } from '@anuragchvn-blip/solana-tip-overlay-sdk/adapters';
 import pg from 'pg';
 
 class PostgresAdapter extends StorageAdapter {
@@ -344,7 +361,7 @@ class PostgresAdapter extends StorageAdapter {
 Browser utility for Phantom wallet integration.
 
 ```javascript
-import { PhantomWalletAdapter } from 'solana-tip-overlay-sdk/client';
+import { PhantomWalletAdapter } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 
 const wallet = new PhantomWalletAdapter();
 
@@ -369,7 +386,7 @@ if (wallet.isInstalled()) {
 Browser utility for sending tips.
 
 ```javascript
-import { TipSender } from 'solana-tip-overlay-sdk/client';
+import { TipSender } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 
 const tipSender = new TipSender('/api');
 
@@ -400,7 +417,7 @@ const url = tipSender.getExplorerUrl(signature, 'devnet');
 Browser WebSocket client for overlays.
 
 ```javascript
-import { OverlayClient } from 'solana-tip-overlay-sdk/client';
+import { OverlayClient } from '@anuragchvn-blip/solana-tip-overlay-sdk/client';
 
 const client = new OverlayClient('ws://localhost:3000/ws', 'mychannel');
 

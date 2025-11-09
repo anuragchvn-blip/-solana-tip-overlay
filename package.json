@@ -1,5 +1,5 @@
 {
-  "name": "solana-tip-overlay-sdk",
+  "name": "@anuragchvn-blip/solana-tip-overlay-sdk",
   "version": "1.0.0",
   "description": "SDK for building Solana tip overlays for streamers",
   "type": "module",
@@ -48,5 +48,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/anuragchvn-blip/-solana-tip-overlay"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
