@@ -1,0 +1,27 @@
+# Development files
+examples/express-server/.env
+examples/express-server/db.json
+examples/express-server/node_modules
+
+# Documentation
+NOVA_DESIGN_IMPLEMENTATION.md
+PROJECT_SUMMARY.md
+STATUS.md
+
+# Git
+.git
+.gitignore
+
+# Editor
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
