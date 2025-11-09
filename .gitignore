@@ -1,0 +1,7 @@
+node_modules/
+.env
+db.json
+*.log
+.DS_Store
+examples/**/db.json
+examples/**/.env

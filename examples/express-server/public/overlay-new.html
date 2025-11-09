@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tip Overlay - Universal Tip SDK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .overlay-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 80vh;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .tip-alert {
+            background: rgba(102, 126, 234, 0.15);
+            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 24px 28px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: auto;
+        }
+
+        .tip-alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 100%;
+            animation: gradientShift 3s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(450px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(450px) scale(0.8);
+            }
+        }
+
+        .tip-alert.removing {
+            animation: slideOut 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .tip-icon {
+            font-size: 32px;
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tip-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.5px;
+        }
+
+        .tip-amount .currency {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-left: 4px;
+        }
+
+        .tip-details {
+            margin-top: 10px;
+        }
+
+        .tip-from {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 4px;
+        }
+
+        .tip-platform {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-left: 6px;
+        }
+
+        .tip-message {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 8px;
+            line-height: 1.5;
+            font-style: italic;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            background: rgba(102, 126, 234, 0.15);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .connection-status.connected {
+            background: rgba(56, 239, 125, 0.15);
+            border-color: rgba(56, 239, 125, 0.3);
+        }
+
+        .connection-status.error {
+            background: rgba(245, 87, 108, 0.15);
+            border-color: rgba(245, 87, 108, 0.3);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            margin-right: 6px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .connection-status.connected .status-dot {
+            background: #38ef7d;
+        }
+
+        .connection-status.error .status-dot {
+            background: #f5576c;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Stats panel */
+        .stats-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            padding: 16px 20px;
+            background: rgba(102, 126, 234, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            min-width: 180px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Test button (for development) */
+        .test-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">
+        <span class="status-dot"></span>
+        Connecting...
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+        <div class="stat-row">
+            <span class="stat-label">Session Tips:</span>
+            <span class="stat-value" id="tipCount">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Total SOL:</span>
+            <span class="stat-value" id="totalAmount">0.000</span>
+        </div>
+    </div>
+
+    <div class="overlay-container" id="overlayContainer"></div>
+
+    <!-- Test button (remove in production) -->
+    <button class="test-btn" id="testBtn">Test Alert</button>
+
+    <script type="module">
+        import { OverlayClient } from './sdk/OverlayClient.js';
+
+        let tipCount = 0;
+        let totalAmount = 0;
+        const MAX_ALERTS = 5;
+        const ALERT_DURATION = 8000; // 8 seconds
+
+        const connectionStatus = document.getElementById('connectionStatus');
+        const overlayContainer = document.getElementById('overlayContainer');
+        const tipCountEl = document.getElementById('tipCount');
+        const totalAmountEl = document.getElementById('totalAmount');
+
+        // Initialize overlay client
+        const wsUrl = `ws://${window.location.hostname}:3000/ws`;
+        const overlay = new OverlayClient(wsUrl);
+
+        overlay.on('connected', () => {
+            connectionStatus.className = 'connection-status connected';
+            connectionStatus.innerHTML = '<span class="status-dot"></span>Connected';
+        });
+
+        overlay.on('disconnected', () => {
+            connectionStatus.className = 'connection-status error';
+            connectionStatus.innerHTML = '<span class="status-dot"></span>Disconnected';
+        });
+
+        overlay.on('error', (error) => {
+            connectionStatus.className = 'connection-status error';
+            connectionStatus.innerHTML = '<span class="status-dot"></span>Error';
+            console.error('Overlay error:', error);
+        });
+
+        overlay.on('tip', (tipData) => {
+            console.log('Tip received:', tipData);
+            showTipAlert(tipData);
+        });
+
+        // Connect to WebSocket
+        overlay.connect();
+
+        function showTipAlert(tipData) {
+            // Update stats
+            tipCount++;
+            totalAmount += parseFloat(tipData.amount) || 0;
+            tipCountEl.textContent = tipCount;
+            totalAmountEl.textContent = totalAmount.toFixed(3);
+
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = 'tip-alert';
+            
+            // Extract platform from message if available
+            const platformMatch = tipData.message?.match(/\[(.*?)\]/);
+            const platform = platformMatch ? platformMatch[1] : 'Web';
+            const cleanMessage = tipData.message?.replace(/\[.*?\]\s*/, '') || '';
+
+            alert.innerHTML = `
+                <div class="tip-alert::before"></div>
+                <div class="tip-header">
+                    <div class="tip-icon">💎</div>
+                    <div class="tip-amount">
+                        ${parseFloat(tipData.amount).toFixed(3)}
+                        <span class="currency">SOL</span>
+                    </div>
+                </div>
+                <div class="tip-details">
+                    <div class="tip-from">
+                        From: ${tipData.from || 'Anonymous'}
+                        <span class="tip-platform">${platform}</span>
+                    </div>
+                    ${cleanMessage ? `<div class="tip-message">"${cleanMessage}"</div>` : ''}
+                </div>
+            `;
+
+            overlayContainer.insertBefore(alert, overlayContainer.firstChild);
+
+            // Remove oldest alert if too many
+            const alerts = overlayContainer.querySelectorAll('.tip-alert');
+            if (alerts.length > MAX_ALERTS) {
+                const oldestAlert = alerts[alerts.length - 1];
+                oldestAlert.classList.add('removing');
+                setTimeout(() => oldestAlert.remove(), 400);
+            }
+
+            // Auto-remove after duration
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.classList.add('removing');
+                    setTimeout(() => alert.remove(), 400);
+                }
+            }, ALERT_DURATION);
+        }
+
+        // Test button (for development)
+        document.getElementById('testBtn').addEventListener('click', () => {
+            const testTips = [
+                { amount: 0.1, from: 'TestUser123', message: '[Twitch] Love the stream! Keep it up!' },
+                { amount: 0.5, from: 'CryptoFan', message: '[YouTube] Amazing content!' },
+                { amount: 1.0, from: 'BigSupporter', message: '[Discord] You deserve it!' },
+                { amount: 0.05, from: 'NewViewer', message: '[Twitter] First tip!' }
+            ];
+            
+            const randomTip = testTips[Math.floor(Math.random() * testTips.length)];
+            showTipAlert(randomTip);
+        });
+
+        // URL parameter for streamer ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamerId = urlParams.get('streamer');
+        
+        if (streamerId) {
+            console.log('Overlay initialized for streamer:', streamerId);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Tip - Universal Tip SDK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            z-index: -2;
+        }
+
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(30px);
+            border-radius: 24px;
+            padding: 48px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 32px;
+            font-size: 15px;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .wallet-status {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 18px 20px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-status.connected {
+            background: rgba(56, 239, 125, 0.15);
+            border-color: rgba(56, 239, 125, 0.3);
+        }
+
+        .wallet-status-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+
+        .wallet-address {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            word-break: break-all;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            font-size: 15px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+
+        select option {
+            background: #764ba2;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .amount-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .preset-btn {
+            padding: 14px 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .preset-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 12px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+        }
+
+        .btn.hidden {
+            display: none;
+        }
+
+        .message {
+            margin-top: 24px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(56, 239, 125, 0.15);
+            border: 1px solid rgba(56, 239, 125, 0.3);
+            color: #ffffff;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(245, 87, 108, 0.15);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #ffffff;
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,.25);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .platform-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 4px 8px 0;
+        }
+
+        .powered-by {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    
+    <div class="container">
+        <div class="glass-card">
+            <h1>Send a Tip</h1>
+            <p class="subtitle">Support creators across any platform</p>
+
+            <div class="wallet-status" id="walletStatus">
+                <div class="wallet-status-text">🔌 Connecting wallet...</div>
+            </div>
+
+            <form id="tipForm">
+                <div class="form-group">
+                    <label for="streamerId">Creator ID or Username</label>
+                    <input 
+                        type="text" 
+                        id="streamerId" 
+                        placeholder="Enter creator ID"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="platform">Platform</label>
+                    <select id="platform">
+                        <option value="twitch">Twitch</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="discord">Discord</option>
+                        <option value="twitter">Twitter/X</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="kick">Kick</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount (SOL)</label>
+                    <input 
+                        type="number" 
+                        id="amount" 
+                        step="0.001" 
+                        min="0.001"
+                        placeholder="0.1"
+                        required
+                    >
+                    <div class="amount-presets">
+                        <button type="button" class="preset-btn" data-amount="0.01">0.01</button>
+                        <button type="button" class="preset-btn" data-amount="0.05">0.05</button>
+                        <button type="button" class="preset-btn" data-amount="0.1">0.1</button>
+                        <button type="button" class="preset-btn" data-amount="0.5">0.5</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="message" 
+                        placeholder="Say something nice..."
+                        maxlength="200"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="sendBtn" disabled>
+                    Send Tip
+                </button>
+
+                <button type="button" class="btn hidden" id="connectBtn">
+                    Connect Wallet
+                </button>
+            </form>
+
+            <div id="messageBox" class="message"></div>
+
+            <div class="powered-by">
+                Powered by Solana Tip SDK • Universal tipping for all platforms
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Buffer from ESM CDN that handles Node modules properly -->
+    <script type="module">
+        import { Buffer } from 'https://cdn.skypack.dev/buffer@6.0.3';
+        window.Buffer = Buffer;
+        globalThis.Buffer = Buffer;
+    </script>
+    <script type="module">
+        import { PhantomWalletAdapter } from './sdk/PhantomWalletAdapter.js';
+        import { TipSender } from './sdk/TipSender.js';
+
+        let wallet = null;
+        let tipSender = null;
+
+        // Auto-connect wallet on page load
+        async function autoConnectWallet() {
+            const statusEl = document.getElementById('walletStatus');
+            const sendBtn = document.getElementById('sendBtn');
+            const connectBtn = document.getElementById('connectBtn');
+
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    statusEl.innerHTML = '<div class="wallet-status-text">⚠️ Phantom wallet not found</div>';
+                    statusEl.classList.remove('connected');
+                    connectBtn.style.display = 'block';
+                    sendBtn.style.display = 'none';
+                    return;
+                }
+
+                wallet = new PhantomWalletAdapter();
+                tipSender = new TipSender({
+                    cluster: 'mainnet-beta',
+                    commitment: 'confirmed'
+                });
+
+                statusEl.innerHTML = '<div class="wallet-status-text">🔌 Connecting to Phantom...</div>';
+
+                const publicKey = await wallet.connect();
+
+                statusEl.innerHTML = `
+                    <div class="wallet-status-text">✅ Wallet Connected</div>
+                    <div class="wallet-address">${publicKey}</div>
+                `;
+                statusEl.classList.add('connected');
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Auto-connect failed:', error);
+                statusEl.innerHTML = '<div class="wallet-status-text">❌ Connection failed - Click to retry</div>';
+                connectBtn.style.display = 'block';
+                sendBtn.style.display = 'none';
+            }
+        }
+
+        // Manual connect
+        document.getElementById('connectBtn').addEventListener('click', autoConnectWallet);
+
+        // Amount presets
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('amount').value = this.dataset.amount;
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('tipForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const sendBtn = document.getElementById('sendBtn');
+            const messageBox = document.getElementById('messageBox');
+            const streamerId = document.getElementById('streamerId').value;
+            const platform = document.getElementById('platform').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const message = document.getElementById('message').value;
+
+            if (!wallet || !tipSender) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+
+            if (amount <= 0) {
+                showMessage('Amount must be greater than 0', 'error');
+                return;
+            }
+
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Sending... <span class="loading"></span>';
+
+            try {
+                // Get streamer info from backend
+                const response = await fetch(`/api/streamer/${streamerId}`);
+                if (!response.ok) {
+                    throw new Error('Creator not found. Ask them to register!');
+                }
+
+                const { address } = await response.json();
+
+                // Send the tip
+                const signature = await tipSender.sendTip(
+                    wallet,
+                    address,
+                    amount,
+                    message ? `[${platform}] ${message}` : `Tip from ${platform}`
+                );
+
+                showMessage(`🎉 Tip sent successfully! Signature: ${signature.slice(0, 8)}...`, 'success');
+                
+                // Reset form
+                document.getElementById('tipForm').reset();
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+            } catch (error) {
+                console.error('Tip error:', error);
+                showMessage(`Error: ${error.message}`, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Send Tip';
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            messageBox.className = `message ${type}`;
+            
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+                messageBox.className = 'message';
+            }, 5000);
+        }
+
+        // Auto-connect on page load
+        window.addEventListener('load', autoConnectWallet);
+    </script>
+</body>
+</html>
