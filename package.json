@@ -1,5 +1,5 @@
 {
-  "name": "@solana-tip/sdk",
+  "name": "solana-tip-overlay-sdk",
   "version": "1.0.0",
   "description": "SDK for building Solana tip overlays for streamers",
   "type": "module",
